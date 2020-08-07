@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { fetchWeather } from './api/fetchWeather';
 import './App.css';
@@ -6,13 +6,35 @@ import './App.css';
 const App = () => {
   const [query, setQuery] = useState('');
   const [weather, setWeather] = useState({});
-  
+  useEffect(() => {
+    if(Notification.permission !== "granted") {
+      Notification.requestPermission(function(status) {
+        console.log('Notification permission status:', status);
+      });
+    }
+  }, []);
   const search = async (e) => {
     if(e.key === 'Enter') {
-      const data = await fetchWeather(query);
+      if(query === "triggerme") {
+        navigator.serviceWorker.getRegistration().then(function(reg) {
+          var options = {
+            body: 'Here is an easter egg notification!',
+            icon: 'images/logo.png',
+            vibrate: [100, 50, 100],
+            data: {
+              dateOfArrival: Date.now(),
+              primaryKey: 1
+            }
+          };
+          reg.showNotification('Easter egg notif', options);
+        });
+      } else {    
+        const data = await fetchWeather(query);
 
-      setWeather(data);
-      setQuery('');
+        setWeather(data);
+        
+        setQuery('');
+      }
     }
   }
 
