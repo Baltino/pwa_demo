@@ -1,5 +1,5 @@
 const CACHE_NAME = "version-1";
-const urlsToCache = [ 'index.html', 'offline.html' ];
+const urlsToCache = [ 'index.html', 'offline.html', '/images/forest_offline.jpg' ];
 
 const self = this;
 
@@ -17,13 +17,18 @@ self.addEventListener('install', (event) => {
 
 // Listen for requests
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(() => {
-        return fetch(event.request) 
-          .catch(() => caches.match('offline.html'))
-      })
-  )
+  const url = new URL(event.request.url);
+  if(url.pathname.includes('/forest_offline.jpg')) {
+    event.respondWith(caches.match('/images/forest_offline.jpg'));
+  }else {
+    event.respondWith(
+      caches.match(event.request)
+        .then(() => {
+          return fetch(event.request) 
+            .catch(() => caches.match('offline.html'))
+        })
+    )
+  }
 });
 
 // Activate the SW
